@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile Fetcher</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    input,
+    button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Welcome to the User Profile Fetcher</h1>
+  <p>Enter a user ID to fetch the profile:</p>
+
+  <form id="userForm">
+
+    <label>
+      Username:
+      <input type="text" id="usernameInput" placeholder="Enter username">
+    </label>
+    <label>
+      Password
+      <input type="password" id="passwordInput" placeholder="Enter password">
+    </label>
+    <button type="submit">Fetch Profile</button>
+  </form>
+
+  <div id="userInfo"></div>
+  <div id="errorMessage" style="color: red; display: none;"></div>
+
+  <!-- External server logic -->
+  <script src="server.js"></script>
+
+  <script>
+    // Handle form submission
+    document.getElementById('userForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Reset messages
+      const userInfoDiv = document.getElementById('userInfo')
+      userInfoDiv.textContent = ''
+
+
+      const errorMessageDiv = document.getElementById('errorMessage');
+      errorMessageDiv.style.display = 'none';
+
+      // Get form input
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+
+
+      retryNTimes(authenticate, 2, (err, userId) => {
+        if (err) {
+          errorMessageDiv.textContent = `Error: ${err}`
+          errorMessageDiv.style.display = 'block'
+        } else {
+          userInfoDiv.textContent = `Login Successful! Fetching your profile`
+
+          retryNTimes(fetchUserProfile, 2, (err, userData) => {
+            if (err) {
+              errorMessageDiv.textContent = `Error: ${err}`
+              errorMessageDiv.display = 'block'
+            } else {
+              userInfoDiv.textContent = `Hello, ${userData.name}!\nYou are ${userData.age} years old!`;
+            }
+          }, userId)
+        }
+      }, username, password);
+
+    });
+  </script>
+</body>
+
+</html>
