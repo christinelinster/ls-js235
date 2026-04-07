@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile Fetcher</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    input,
+    button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Welcome to the User Profile Fetcher</h1>
+  <p>Enter a user ID to fetch the profile:</p>
+
+  <form id="userForm">
+    <label for="usernameInput">Username: </label>
+    <input type="text" id="usernameInput" placeholder="Enter username">
+
+    <label for="passwordInput">Password: </label>
+    <input type="password" id="passwordInput" placeholder="Enter password">
+    <button type="submit">Fetch Profile</button>
+  </form>
+
+  <div id="userInfo"></div>
+  <div id="errorMessage" style="color: red; display: none;"></div>
+
+  <!-- External server logic -->
+  <script src="server.js"></script>
+
+  <script>
+
+    async function retryNTimes(fn, n, ...args) {
+      let attempts = 0;
+
+      while (attempts < n) {
+        try {
+          console.log(`Attempt number: ${attempts + 1}`)
+          return await fn(...args)
+        } catch (e) {
+          if (attempts >= n) {
+            throw e;
+          }
+          attempts++
+        }
+      }
+
+    }
+
+    // Handle form submission
+    document.getElementById('userForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const userInfoDiv = document.getElementById('userInfo');
+      const errorMessageDiv = document.getElementById('errorMessage');
+
+      userInfoDiv.textContent = '';
+      errorMessageDiv.textContent = '';
+
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+
+
+      async function authenticateAndFetchUserProfile(username, password) {
+        try {
+          let userId = await retryNTimes(authenticate, 2, username, password)
+          userInfoDiv.textContent = 'Login Successful! Fetching your data...';
+
+          let userData = await retryNTimes(fetchUserProfile, 2, userId);
+          userInfoDiv.textContent = `Hello, ${userData.name}!\nYou are ${userData.age} years old!`;
+        } catch (e) {
+          errorMessageDiv.textContent = e;
+          errorMessageDiv.style.display = 'block';
+        }
+      }
+
+      authenticateAndFetchUserProfile(username, password)
+
+    });
+  </script>
+</body>
+
+</html>
