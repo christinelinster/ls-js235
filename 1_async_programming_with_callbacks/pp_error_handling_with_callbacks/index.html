@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile Fetcher</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    input,
+    button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Welcome to the User Profile Fetcher</h1>
+  <p>Enter a user ID to fetch the profile:</p>
+
+  <form id="userForm">
+    <label for="username">
+      Username:
+      <input type="text" id="username" placeholder="Enter username">
+    </label>
+    <label for="password">
+      Username:
+      <input type="password" id="password" placeholder="Enter password">
+    </label>
+
+    <button type="submit">Fetch Profile</button>
+  </form>
+
+  <div id="userInfo"></div>
+  <div id="errorMessage" style="color: red; display: none;"></div>
+
+  <!-- External server logic -->
+  <script src="server.js"></script>
+
+  <script>
+    // Handle form submission
+    document.getElementById('userForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Reset messages
+      const userInfoDiv = document.getElementById('userInfo');
+      userInfoDiv.textContent = '';
+      const errorMessageDiv = document.getElementById('errorMessage')
+      errorMessageDiv.style.display = 'none'
+
+      // Get form input
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      retryNTimes(authenticate, 2, (errMsg, userId) => {
+        // Update message
+        if (errMsg) {
+          errorMessageDiv.textContent = `Error: ${errMsg}`
+          errorMessageDiv.style.display = 'block'
+        } else {
+          userInfoDiv.textContent = 'Login successful! Fetching your profile ...'
+          retryNTimes(fetchUserProfile, 2, (errorMessage, userData) => {
+            // Update message
+            if (errorMessage) {
+              errorMessageDiv.textContent = `Error: ${errorMessage}`
+              errorMessageDiv.style.display = 'block'
+            } else {
+              userInfoDiv.textContent = `Hello, ${userData.name}!\nYou are ${userData.age} years old!`;
+            }
+          }, userId)
+        }
+      }, username, password)
+
+      function retryNTimes(func, n, cb, ...args) {
+        let attempts = 0;
+
+        function attempt() {
+          console.log(`Attempt ${attempts}`)
+          func(...args, (err, data) => {
+            if (err && attempts < n) {
+              attempts += 1
+              attempt();
+            } else {
+              cb(err, data)
+            }
+          })
+        }
+
+        attempt();
+
+      }
+
+
+    });
+  </script>
+</body>
+
+</html>
