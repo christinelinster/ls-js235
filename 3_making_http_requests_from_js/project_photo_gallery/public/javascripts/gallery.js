@@ -35,13 +35,75 @@ async function main() {
 
   let comments = await fetchComments(firstPhotoId);
   renderComments(comments)
+
+  slideshow.init();
+
+
+}
+
+const slideshow = {
+  init() {
+    this.slideshow = document.getElementById('slideshow')
+    this.slides = this.slideshow.querySelectorAll('figure')
+
+    console.log(this.slideshow)
+    console.log(this.slides)
+
+    this.firstSlide = this.slides[0];
+    this.lastSlide = this.slides[this.slides.length - 1]
+    this.currentSlide = this.firstSlide;
+    this.bind();
+  },
+
+  prevSlide(event) {
+    event.preventDefault();
+    let prev = this.currentSlide.previousElementSibling || this.lastSlide;
+    this.changeSlide(prev)
+  },
+
+  nextSlide(event) {
+    event.preventDefault();
+    let next = this.currentSlide.nextElementSibling || this.firstSlide;
+    this.changeSlide(next);
+  },
+
+  async renderPhotoContent(id) {
+    renderPhotoInformation(Number(id))
+    let comments = await fetchComments(id);
+    renderComments(comments);
+  },
+
+  changeSlide(newSlide) {
+    this.fadeOut(this.currentSlide);
+    this.fadeIn(newSlide);
+    this.renderPhotoContent(newSlide.getAttribute('data-id'));
+    this.currentSlide = newSlide;
+  },
+
+  fadeOut(slide) {
+    slide.classList.add('hide')
+    slide.classList.remove('show')
+  },
+
+  fadeIn(slide) {
+    slide.classList.add('show')
+    slide.classList.remove('hide')
+  },
+
+  bind() {
+    let prevButton = this.slideshow.querySelector('a.prev');
+    let nextButton = this.slideshow.querySelector('a.next');
+
+    prevButton.addEventListener('click', event => this.prevSlide(event));
+    nextButton.addEventListener('click', event => this.nextSlide(event))
+  }
+
 }
 
 
 document.addEventListener('DOMContentLoaded', () => {
   main();
-})
 
-// get the data
+})
 
 
