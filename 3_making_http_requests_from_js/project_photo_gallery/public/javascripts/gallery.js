@@ -1,0 +1,47 @@
+import templates from './templates.js';
+let photos;
+
+async function getPhotos() {
+  let response = await fetch('/photos')
+  return response.json();
+}
+
+function renderPhotos() {
+  let slides = document.getElementById('slides');
+  slides.innerHTML = templates.photos(photos);
+}
+
+function renderPhotoInformation(id) {
+  let photo = photos.find(photo => photo.id === id);
+  let information = document.getElementById('information');
+  information.innerHTML = templates.photoInformation(photo)
+}
+
+async function fetchComments(id) {
+  let response = await fetch(`/comments?photo_id=${id}`);
+  return response.json();
+}
+
+function renderComments(comments) {
+  let commentList = document.querySelector('#comments ul')
+  commentList.innerHTML = comments.map(com => templates.comment(com)).join('')
+}
+
+async function main() {
+  photos = await getPhotos();
+  let firstPhotoId = photos[0].id;
+  renderPhotos();
+  renderPhotoInformation(firstPhotoId)
+
+  let comments = await fetchComments(firstPhotoId);
+  renderComments(comments)
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  main();
+})
+
+// get the data
+
+
