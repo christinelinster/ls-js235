@@ -37,9 +37,62 @@ async function main() {
   renderComments(comments)
 
   slideshow.init();
-
-
 }
+
+async function handleActions(event) {
+  event.preventDefault();
+
+  let {target} = event;
+  let {property} = target.dataset
+
+  if (!property) return;
+
+  let id = Number(target.dataset.id);
+  let href = target.href;
+  let currLikes = target.textContent;
+
+  let response = await fetch(href, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+    },
+    body: 'photo_id=' + id,
+  })
+
+  let data = await response.json();
+  target.textContent = currLikes.replace(/\d+/, data.total)
+
+  let updatedPhoto = photos.find(photo => photo.id === id);
+  updatedPhoto[property] = data.total;
+}
+
+function renderNewComment(comment) {
+  let commentList = document.querySelector('#comments ul');
+  commentList.insertAdjacentHTML('beforeend', templates.comment(comment))
+}
+
+async function handleSubmit(event) {
+  event.preventDefault();
+  let form = event.target;
+  let href = form.getAttribute('action')
+  let formData = new FormData(form);
+  let currentSlideId = slideshow.currentSlide.getAttribute('data-id')
+
+  formData.set('photo_id', currentSlideId)
+
+  let newComment = await fetch(href, {
+    method: form.method,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+    },
+    body: new URLSearchParams(formData)
+  })
+
+  let json = await newComment.json();
+  renderNewComment(json)
+  form.reset();
+}
+
 
 const slideshow = {
   init() {
@@ -100,10 +153,10 @@ const slideshow = {
 
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
   main();
-
+  document.getElementById('information').addEventListener('click', handleActions)
+  document.querySelector('form').addEventListener('submit', handleSubmit)
 })
 
 
