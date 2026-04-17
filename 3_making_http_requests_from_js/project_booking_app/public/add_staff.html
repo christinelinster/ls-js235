@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Exercise 3</title>
+  <style>
+    dl {
+      border: 3px double #ccc;
+      padding: 0.5em;
+    }
+
+    dt {
+      float: left;
+      clear: left;
+      width: 100px;
+      text-align: right;
+      font-weight: bold;
+      color: #f0595b;
+    }
+
+    dt::after {
+      content: ":";
+    }
+
+    dd {
+      margin: 0 0 0 110px;
+      padding: 0 0 0.5em 0;
+    }
+
+    input[type="submit"] {
+      color: #fff;
+      background: #f0595b;
+      border-color: #f0595b;
+      border-radius: 5px;
+      width: 100px;
+      height: 50px;
+    }
+
+    form {
+      padding: 1em 0;
+    }
+
+    fieldset {
+      padding: 1.5em;
+      width: 100%;
+    }
+
+    div {
+      align-items: center;
+      margin-bottom: 0.5em;
+    }
+
+    label {
+      display: inline-block;
+      width: 100px;
+      text-align: right;
+      font-weight: bold;
+      color: #f0595b;
+      margin-right: 10px;
+    }
+
+    input,
+    select {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      max-width: 200px;
+    }
+
+    input[type="submit"],
+    button {
+      display: inline-block;
+      margin-top: 15px;
+      color: #fff;
+      border-radius: 5px;
+      width: 100px;
+      height: 50px;
+      border: none;
+      cursor: pointer;
+    }
+
+    input[type="submit"] {
+      background: #f0595b;
+    }
+
+    button {
+      background: #5CAFDE;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="add_staff" method="post" action="/api/staff_members">
+    <dl>
+      <dt>
+        <label for="email">Email</label>
+      </dt>
+      <dd>
+        <input type="email" id="email" name="email">
+      </dd>
+      <dt>
+        <label for="name">Name</label>
+      </dt>
+      <dd>
+        <input type="text" id="name" name="name">
+      </dd>
+    </dl>
+    <input type="submit">
+  </form>
+
+  <button id="btnAdd">Add more schedules</button>
+  <form id="add_schedule" method="post" action="/api/schedules">
+    <div id="schedules"></div>
+    <input id="btnSubmit" type="submit">
+  </form>
+  <script src="./javascripts/main.js"></script>
+</body>
+
+</html>
