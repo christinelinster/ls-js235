@@ -378,8 +378,60 @@ class ViewBookingsUI {
   }
 
 }
+// schedules cannot be cancelled if a booking has already been created for it
+
+class CancellationsUI{
+  constructor(){
+    this.bookingForm = document.querySelector('#cancel_booking')
+    this.scheduleForm = document.querySelector('#cancel_schedule')
+
+    this.bookingForm.addEventListener('submit', event => this.handleBookingCancellation(event))
+    this.scheduleForm.addEventListener('submit', event => this.handleScheduleCancellation(event))
+  }
+
+  async handleBookingCancellation(event) {
+    event.preventDefault();
+    let form = event.target;
+    let bookingId = form.querySelector('#booking_id').value;
+
+    let response = await fetch(`/api/bookings/${encodeURIComponent(bookingId)}`, {
+      method: 'PUT',
+    })
+
+    if (response.status === 204) {
+      alert('Booking cancelled')
+      form.reset();
+    } else if (response.status === 404) {
+      let body = await response.text();
+      alert(body)
+    }
+
+  }
+
+  async handleScheduleCancellation(event) {
+    event.preventDefault();
+
+    let form = event.target;
+    let scheduleId = form.querySelector('#schedule_id').value;
+
+    let response = await fetch(`/api/schedules/${encodeURIComponent(scheduleId)}`, {
+      method: 'DELETE',
+    })
+
+    if (response.status === 204) {
+      alert('Schedule cancelled')
+      form.reset();
+    } else {
+      let body = await response.text();
+      alert(body)
+    }
+
+  }
+
+
+}
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  new ViewBookingsUI()
+  new CancellationsUI();
 })
