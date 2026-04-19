@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Part 5</title>
+  <script src="./javascripts/main.js"></script>
+</head>
+
+<body>
+  <h1>Schedules</h1>
+  <form id="bookings" action="/api/bookings" method="post">
+    <div>
+      <label for="id">Please select one schedule</label>
+      <select name="id" id="id"></select>
+    </div>
+
+    <div>
+      <label for="student_email">Email</label>
+      <input type="email" id="student_email" name="student_email">
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+
+  <form style="display: none" id="add_student" action="/api/students" method="post">
+    <h1>Please provide new student details</h1>
+    <div id="student_info">
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email">
+
+      </div>
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name">
+      </div>
+      <div>
+        <label for="booking_sequence">Booking Sequence:</label>
+        <input type="number" id="booking_sequence" name="booking_sequence">
+      </div>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+
+</body>
+
+</html>

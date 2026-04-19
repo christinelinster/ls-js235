@@ -92,6 +92,20 @@
 </head>
 
 <body>
+
+  <h1>Schedules</h1>
+  <form id="bookings" action="/bookings" method="post">
+    <div>
+      <label for="staff_schedules">Please select one schedule</label>
+      <select name="staff_schedules" id="staff_schedules"></select>
+    </div>
+    <div>
+      <label for="student_email">Email</label>
+      <input name='student_email' type="text">
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+
   <form id="add_staff" method="post" action="/api/staff_members">
     <dl>
       <dt>

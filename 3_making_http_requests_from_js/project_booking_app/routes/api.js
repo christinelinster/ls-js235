@@ -23,9 +23,9 @@ function generateSequence() {
 }
 
 /**
- * @api {get} /staff_members Retrieves all available staff members  
+ * @api {get} /staff_members Retrieves all available staff members
  * @apiGroup Staff
- * 
+ *
  * @apiSuccess {Object[]} staff_members            List of staff.
  * @apiSuccess {Number}   staff_members.id         ID of staff.
  * @apiSuccess {String}   staff_members.name       Name of staff.
@@ -40,7 +40,7 @@ function generateSequence() {
  *         name: 'Aaron Nitzsche',
  *         email: 'kali@rosenbaumtremblay.biz' }
  *     ]
- * 
+ *
  */
 router.get('/staff_members', function(req, res, next) {
   db.all('SELECT * FROM STAFFS;', function(err, rows) {
@@ -51,7 +51,7 @@ router.get('/staff_members', function(req, res, next) {
 /**
  * @api {get} /students Retrieves all registered students
  * @apiGroup Student
- * 
+ *
  * @apiSuccess {Object[]} students                 List of registered students.
  * @apiSuccess {Number}   students.id              ID of student.
  * @apiSuccess {String}   students.name            Name of student.
@@ -66,7 +66,7 @@ router.get('/staff_members', function(req, res, next) {
  *         name: 'Aaron Nitzsche',
  *         email: 'kali@rosenbaumtremblay.biz' }
  *     ]
- * 
+ *
  */
 router.get('/students', function(req, res, next) {
   db.all('SELECT * FROM STUDENTS;', function(err, rows) {
@@ -75,16 +75,16 @@ router.get('/students', function(req, res, next) {
 });
 
 /**
- * @api {get} /schedules Retrieves all available schedules  
+ * @api {get} /schedules Retrieves all available schedules
  * @apiGroup Schedule
- * 
+ *
  * @apiSuccess {Object[]} schedules                List of staff schedules.
  * @apiSuccess {Number}   schedules.id             ID of schedule.
  * @apiSuccess {Number}   schedules.staff_id       ID of the staff for the schedule.
  * @apiSuccess {String}   schedules.date           Date of the schedule.
  * @apiSuccess {String}   schedules.time           Time of the schedule.
  * @apiSuccess {String}   schedules.student_email  Email of the student who booked schedule.
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     [ { id: 1,
@@ -107,18 +107,18 @@ router.get('/students', function(req, res, next) {
 router.get('/schedules', function(req, res, next) {
   db.all('SELECT * FROM BOOKINGS;', function(err, rows) {
     const rand = Math.random();
-    if (rand >= 0.5 && rows.length > 7) {      
+    if (rand >= 0.5 && rows.length > 7) {
       sleep(7000);
     }
 
-    res.json(rows);    
+    res.json(rows);
   });
 });
 
 /**
  * @api {get} /schedules/:staff_id Retrieves all available schedules for a given staff_id
  * @apiGroup Schedule
- * 
+ *
  * @apiParam {Number} id Staff members unique ID.
  *
  * @apiSuccess {Object[]} schedules                List of staff schedules.
@@ -127,7 +127,7 @@ router.get('/schedules', function(req, res, next) {
  * @apiSuccess {String}   schedules.date           Date of the schedule.
  * @apiSuccess {String}   schedules.time           Time of the schedule.
  * @apiSuccess {String}   schedules.student_email  Email of the student who booked schedule.
- * 
+ *
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 200 OK
  *     [ { id: 1,
@@ -146,7 +146,7 @@ router.get('/schedules/:staff_id', function(req, res, next) {
 /**
  * @api {post} /staff_members Adds a new staff member
  * @apiGroup Staff
- * 
+ *
  * @apiParam {String} name (required) Name of staff.
  * @apiParam {String} email (required) Email of staff.
  *
@@ -157,7 +157,7 @@ router.get('/schedules/:staff_id', function(req, res, next) {
  *     {
  *       id: 1,
  *     }
- * 
+ *
  * @apiError InvalidInput When the staff can not be saved due to invalid inputs.
  * @apiErrorExample {String} InvalidInput Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -182,7 +182,7 @@ router.post('/staff_members', function(req, res, next) {
 /**
  * @api {post} /schedules Adds one or more staff schedules
  * @apiGroup Staff
- * 
+ *
  * @apiParam {Number} staff_id (required) ID of Staff
  * @apiParam {String} date (required) Date of Schedule
  * @apiParam {String} time (required) Time of Schedule
@@ -195,7 +195,7 @@ router.post('/staff_members', function(req, res, next) {
  * @apiSuccessExample {String} Success-Response:
  *     HTTP/1.1 201 CREATED
  *     'Schedules added'
- * 
+ *
  * @apiError InvalidInput When the schedules can not be saved due to invalid inputs. If more than one schedule is to be added, all schedules must have a valid input. Otherwise, none of the schedules (even those with valid inputs) get saved.
  * @apiErrorExample {String} InvalidInput Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -211,7 +211,7 @@ router.post('/schedules', function(req, res, next) {
         $time: schedule.time
       });
     });
-    
+
     res.status(201).send('Schedules added');
   } else {
     res.status(400).send('Please check your inputs');
@@ -221,13 +221,13 @@ router.post('/schedules', function(req, res, next) {
 /**
  * @api {post} /bookings Books a staff member schedule
  * @apiGroup Student
- * 
+ *
  * @apiParam {Number} id (required) ID of the Schedule
  * @apiParam {String} student_email (required) Email of the student
  *
  * @apiSuccessExample {String} Success-Response:
  *     HTTP/1.1 204 No Content
- * 
+ *
  * @apiError ScheduleNotFound When the schedule id provided does not match to an existing schedule or the scehdule is already booked.
  * @apiErrorExample {String} ScheduleNotFound Error-Response:
  *     HTTP/1.1 404 Not Found
@@ -241,7 +241,7 @@ router.post('/schedules', function(req, res, next) {
 router.post('/bookings', function(req, res, next) {
   const email = req.body['student_email'];
   const id = req.body['id'];
-  
+
   const schedule = db.get('SELECT * FROM BOOKINGS WHERE ID = $id and STUDENT_EMAIL IS NULL;', { $id: id }, function(err, row) {
     if (row) {
       const student = db.get('SELECT * FROM STUDENTS WHERE EMAIL = $email;', { $email: email }, function(err, row) {
@@ -253,7 +253,7 @@ router.post('/bookings', function(req, res, next) {
           db.get('INSERT INTO BOOKING_SEQUENCES (student_email, sequence) VALUES ($email, $sequence);', { $email: email, $sequence: sequence });
           res.status(404).send(`Student does not exist; booking_sequence: ${sequence}`);
         }
-      });    
+      });
     } else {
       res.status(404).send('Schedule is either booked or does not exist.');
     }
@@ -263,7 +263,7 @@ router.post('/bookings', function(req, res, next) {
 /**
  * @api {post} /students Adds a student to the database
  * @apiGroup Student
- * 
+ *
  * @apiParam {String} email (required) Email of the student
  * @apiParam {String} name (required) Name of the student
  * @apiParam {Number} booking_sequence (required) This is proof that student tried to book a schedule first. Only students with a booking sequence can be added to the database.
@@ -272,7 +272,7 @@ router.post('/bookings', function(req, res, next) {
  * @apiSuccessExample {String} Success-Response:
  *     HTTP/1.1 201 CREATED
  *     'Successfully added student to the database.''
- * 
+ *
  * @apiError InvalidBookingSequence When the student doesn't have a valid booking sequence.
  * @apiErrorExample {String} InvalidBookingSequence Error-Response:
  *     HTTP/1.1 403 Forbidden
@@ -293,7 +293,7 @@ router.post('/students', function(req, res, next) {
         res.status(201).send('Successfully added student to the database.');
       } else {
         res.status(400).send('Please check your inputs.');
-      } 
+      }
     } else {
       res.status(403).send('Must have booking sequeunce.');
     }
@@ -347,7 +347,7 @@ router.get('/bookings/:date', function(req, res, next) {
 /**
  * @api {put} /bookings/:booking_id Student cancels a booking
  * @apiGroup Student
- * 
+ *
  * @apiParam {Number} booking_id (required) This id the of schedule that the student wants to cancel their booking for.
  * @apiSuccessExample {String} Success-Response:
  *     HTTP/1.1 204 No Content
@@ -356,7 +356,7 @@ router.get('/bookings/:date', function(req, res, next) {
  * @apiErrorExample {String} NoBooking Error-Response:
  *     HTTP/1.1 404 Not Found
  *     'There is no booking on the schedule'
- * 
+ *
  */
 router.put('/bookings/:booking_id', function(req, res, next) {
   db.get('SELECT * FROM BOOKINGS WHERE ID = $id and STUDENT_EMAIL IS NOT NULL;', { $id: req.params['booking_id'] }, function(err, row) {
@@ -372,7 +372,7 @@ router.put('/bookings/:booking_id', function(req, res, next) {
 /**
  * @api {delete} /schedules/:schedule_id Staff cancels schedule
  * @apiGroup Staff
- * 
+ *
  * @apiParam {Number} schedule_id (required) This id the of schedule that the staff wants to cancel
  * @apiSuccessExample {String} Success-Response:
  *     HTTP/1.1 204 No Content
@@ -381,12 +381,12 @@ router.put('/bookings/:booking_id', function(req, res, next) {
  * @apiErrorExample {String} WithBooking Error-Response:
  *     HTTP/1.1 403 Forbidden
  *     'Can not delete the schedule. There is a booking.'
- * 
+ *
  * @apiError NoSchedule When there is no schedule on the ID provided
  * @apiErrorExample {String} NoSchedule Error-Response:
  *     HTTP/1.1 404 Not Found
  *     'Schedule does not exist.'
- * 
+ *
  */
 router.delete('/schedules/:schedule_id', function(req, res, next) {
   db.get('SELECT * FROM BOOKINGS WHERE ID = $id;', { $id: req.params['schedule_id'] }, function(err, row) {

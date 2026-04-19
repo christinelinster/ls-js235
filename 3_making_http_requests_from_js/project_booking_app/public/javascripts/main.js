@@ -181,7 +181,7 @@ class BookingAppUI {
   async main() {
     // Exercise 1: fetch schedules
     await this.fetchSchedules();
-    this.alertScheduleTally();
+    // this.alertScheduleTally();
 
     // Exercise 2: adding staff
     this.newStaffForm.addEventListener('submit', event => this.handleAddStaff(event))
@@ -194,9 +194,144 @@ class BookingAppUI {
 
 }
 
+class BookingUI {
+  constructor() {
+    this.bookingForm = document.querySelector('#bookings')
+    this.newStudentForm = document.querySelector('#add_student')
+    this.availableSchedules = null;
+    this.students = null;
+    this.staffMembers = null;
+
+    this.main();
+
+
+    this.bookingForm.addEventListener('submit', event => this.handleBooking(event));
+    this.newStudentForm.addEventListener('submit', event => this.handleAddStudent(event));
+  }
+
+  async fetchAvailableSchedules() {
+    try {
+      let response = await fetch('/api/schedules')
+      let data = await response.json();
+      if (data) {
+        this.availableSchedules = data.filter(schedule => !schedule.student_email)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  async fetchStaff() {
+    try {
+      let response = await fetch('/api/staff_members')
+      let data = await response.json()
+
+      if (data) {
+        this.staffMembers = data;
+      }
+
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  async fetchStudents() {
+    try {
+      let response = await fetch('/api/students')
+      let data = await response.json()
+      this.students = data;
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  staffIdToName(id) {
+    return this.staffMembers.find(staff => staff.id === id).name;
+  }
+
+
+  renderAvailableSchedules() {
+    let scheduleSelector = this.bookingForm.querySelector('#id');
+    let options = this.availableSchedules.map(({ id, staff_id, date, time }) => (
+      `<option value=${id}>${this.staffIdToName(staff_id)} | ${date} | ${time}</option>`
+    )).join('')
+
+    scheduleSelector.innerHTML = options;
+  }
+
+  renderNewStudentForm(data) {
+    let studentInfo = this.newStudentForm.querySelector('div#student_info');
+    studentInfo.querySelector('#email').value = data.email;
+    studentInfo.querySelector('#booking_sequence').value = data.booking_sequence;
+
+    this.newStudentForm.style.display = 'block';
+  }
+
+  async handleAddStudent(event) {
+    event.preventDefault();
+    let form = event.target;
+    let formData = new FormData(form);
+    let json = JSON.stringify(Object.fromEntries(formData.entries()))
+
+    let response = await fetch(form.action, {
+      method: form.method,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      },
+      body: json,
+    })
+
+    let result = await response.text();
+    alert(result)
+
+    if (response.status === 201) {
+      this.bookingForm.student_email.value = form.email.value;
+      form.reset();
+      this.bookingForm.dispatchEvent(new Event('submit'), {cancelable: true})
+      form.style.display = 'none'
+    }
+  }
+
+  async handleBooking(event) {
+    event.preventDefault();
+    let form = event.target;
+    let formData = new FormData(form);
+    let json = JSON.stringify(Object.fromEntries(formData.entries()))
+    console.log(json)
+
+    let response = await fetch(form.action, {
+      method: form.method,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      },
+      body: json
+    })
+
+    if (response.status === 204) {
+      alert('Booked');
+      form.reset()
+    } else if (response.status === 404) {
+      let body = await response.text();
+      alert(body);
+      let sequence = body.split(':')[1].trim();
+      this.renderNewStudentForm({ email: form.student_email.value, booking_sequence: sequence })
+    }
+  }
+
+  async main() {
+    await Promise.all([
+      this.fetchStaff(),
+      this.fetchAvailableSchedules(),
+    ])
+    this.renderAvailableSchedules();
+  }
+
+
+
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
-  new BookingAppUI()
-
+  new BookingUI()
   // document.querySelector('#btnAdd').addEventListener('click', handleNewSchedule)
 })
