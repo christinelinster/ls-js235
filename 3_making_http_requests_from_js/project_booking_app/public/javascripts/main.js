@@ -287,7 +287,7 @@ class BookingUI {
     if (response.status === 201) {
       this.bookingForm.student_email.value = form.email.value;
       form.reset();
-      this.bookingForm.dispatchEvent(new Event('submit'), {cancelable: true})
+      this.bookingForm.dispatchEvent(new Event('submit'), { cancelable: true })
       form.style.display = 'none'
     }
   }
@@ -325,13 +325,61 @@ class BookingUI {
     ])
     this.renderAvailableSchedules();
   }
+}
+
+class ViewBookingsUI {
+  constructor() {
+    this.bookingList = document.querySelector('#bookings')
+    this.bookings = null;
+    this.main();
+
+    this.bookingList.addEventListener('click', event => this.handleBookingDetails(event))
+  }
+  renderBookings() {
+    let dates = this.bookings.map(date => (
+      `<li name=${date} value=${date}>${date}</li>`
+    )).join('');
+
+    this.bookingList.innerHTML = dates
+  }
+
+  async handleBookingDetails(event) {
+    if (event.target.tagName !== 'LI') return;
+    if(!event.target.hasAttribute('value')) return;
+    if(event.target.children.length > 0) {
+      event.target.querySelector('ul').remove();
+      return;
+    }
+
+    let dateItem = event.target;
+    let date = dateItem.getAttribute('value');
+
+    let response = await fetch(`/api/bookings/${date}`)
+    let data = await response.json();
+
+    let detailsHTML = data.map(([name, email, time]) =>
+      `<li>${name} | ${email} | ${time}</li>`
+    ).join('')
+
+    dateItem.insertAdjacentHTML('beforeend', `<ul>${detailsHTML}</ul>`)
+  }
 
 
+  async fetchAllBookings() {
+    let response = await fetch('/api/bookings')
+    let data = await response.json();
+    console.log(data)
+    this.bookings = data;
+  }
+
+  async main() {
+    await this.fetchAllBookings()
+    this.renderBookings();
+  }
 
 }
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  new BookingUI()
-  // document.querySelector('#btnAdd').addEventListener('click', handleNewSchedule)
+  new ViewBookingsUI()
 })
